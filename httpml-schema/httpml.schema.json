@@ -1,7 +1,13 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://github.com/acc15/httpml/httpml.schema.json",
-    "title": "Product",
-    "description": "A product in the catalog",
-    "type": "object"
+    "$id": "https://acc15.github.io/httpml/httpml.schema.json",
+    "title": "httpml",
+    "description": "httpml json schema",
+    "type": "object",
+    "properties": {
+        "id": {
+            "description": "file identifier",
+            "type": "string"
+        }
+    }
 }
