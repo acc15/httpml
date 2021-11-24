@@ -1,0 +1,17 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://acc15.github.io/httpml/schemas/http/methods.schema.json",
+    "title": "HTTP Methods",
+    "description": "HTTP Method",
+    "enum": [
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "DELETE",
+        "CONNECT",
+        "OPTIONS",
+        "TRACE",
+        "PATCH"
+    ]
+}

@@ -1,0 +1,9 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://acc15.github.io/httpml/schemas/http/headers.schema.json",
+    "title": "HTTP Headers",
+    "type": "object",
+    "additionalProperties": {
+        "$ref": "../common/expression.schema.json"
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://acc15.github.io/httpml/schemas/common/expression.schema.json",
+    "type": "object",
+    "properties": {
+        "type": {
+            "const": "map"
+        },
+        "key": {
+            "$ref": "#"
+        },
+        "map": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#"
+            }
+        },
+        "default": { "$ref": "#" }
+    },
+    "required": [
+        "type",
+        "key",
+        "map",
+        "default"
+    ]
+}

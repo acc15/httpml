@@ -1,0 +1,35 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://acc15.github.io/httpml/schemas/httpml.schema.json",
+    "title": "httpml",
+    "description": "httpml json schema",
+    "type": "object",
+    "properties": {
+        "id": {
+            "description": "file identifier",
+            "$ref": "common/plain.schema.json"
+        },
+        "variables": {
+            "description": "variable set",
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "common/expression.schema.json"
+            }
+        },
+        "request": {
+            "description": "request description",
+            "type": "object",
+            "properties": {
+                "method": {
+                    "$ref": "http/methods.schema.json"
+                },
+                "headers": {
+                    "$ref": "http/headers.schema.json"
+                },
+                "query": {
+                    "type": "object"
+                }
+            }
+        }
+    }
+}

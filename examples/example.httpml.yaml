@@ -1,0 +1,17 @@
+id: example
+variables:
+    env: dev
+    subst: ${env} variable
+    map:
+        type: map
+        key: ${env}
+        map:
+            test: http://test-server/complex-path
+            dev: http://dev-server/other-path
+        default: http://local-server/
+
+request:
+    method: POST
+
+
+
