@@ -2,16 +2,21 @@ id: example
 variables:
     env: dev
     subst: ${env} variable
-    map:
-        type: map
-        key: ${env}
-        map:
-            test: http://test-server/complex-path
-            dev: http://dev-server/other-path
-        default: http://local-server/
+    map: >-
+        ${switch(env, https://local-server/, map(
+            test = http://test-server/complex-path,
+            dev = http://dev-server/other-path
+        ))}
 
 request:
+    headers:
+        Authorization: Basic ${base64($user:$password, encoding=utf-8)}
+        Content-Type: application/json
+        # Reading from file
+        # Authorization: Basic ${base64(file(credentials.txt, encoding = utf-8))}
     method: POST
+    query:
+        test: value
 
 
 
