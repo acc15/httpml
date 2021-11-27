@@ -1,0 +1,20 @@
+PARSER_BEGIN(HttpmlExpression)
+
+public class HttpmlExpression {
+}
+
+PARSER_END(HttpmlExpression)
+
+/** Root production. */
+void Input() :
+{}
+{
+  MatchedBraces() ("\n"|"\r")* <EOF>
+}
+
+/** Brace matching production. */
+void MatchedBraces() :
+{}
+{
+  "{" [ MatchedBraces() ] "}"
+}
