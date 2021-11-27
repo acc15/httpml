@@ -15,9 +15,15 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+val kotestVersion = "5.0.0"
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+    testImplementation("io.kotest:kotest-property:$kotestVersion")
 }

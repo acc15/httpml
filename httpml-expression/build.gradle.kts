@@ -8,9 +8,14 @@ javacc {
     // configuration container for all javacc configurations
     configs {
         register("template") {
-            inputFile = file("src/main/javacc/HttpmlExpression.jj")
+            inputFile = file("src/main/javacc/HttpmlExpressionParser.jjt")
             packageName = "httpml.expression.parser"
-            lookahead = 2
+            lookahead = 1
+            staticParam = "false"
+            jjtree {
+                isConfigured = true
+                multi = "true"
+            }
         }
     }
 }
