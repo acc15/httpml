@@ -11,12 +11,12 @@ class HttpmlExpressionParserTest: StringSpec({
     }
 
     "must parse plain text" {
-        val t = p("Some text").start()
+        val t = p("Some text").parseTemplate()
         println("Plain: $t")
     }
 
     "must parse escaped text" {
-        val t = p("Some \\n\\r \\\${\\} text").start()
+        val t = p("Some \\n\\r \\\${\\} text").parseTemplate()
         println("Escaped: $t")
     }
 

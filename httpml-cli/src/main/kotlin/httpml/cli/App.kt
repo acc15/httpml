@@ -1,7 +1,5 @@
 package httpml.cli
 
-import LibraryClass
-
 class App {
     val greeting: String
         get() {
@@ -11,5 +9,4 @@ class App {
 
 fun main() {
     println(App().greeting)
-    println(LibraryClass().value)
 }
