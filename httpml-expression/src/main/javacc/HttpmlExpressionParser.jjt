@@ -1,94 +1,87 @@
+options {
+    LOOKAHEAD = 1;
+    STATIC = false;
+    // MULTI = false;
+}
+
 PARSER_BEGIN(HttpmlExpressionParser)
 
 package httpml.expression.parser;
+
+import httpml.expression.ast.HttpmlTemplate;
+import java.util.List;
+import java.util.Map;
 
 public class HttpmlExpressionParser {
 }
 
 PARSER_END(HttpmlExpressionParser)
-SKIP :
-{
-  " "
-| "\t"
-| "\n"
-| "\r"
-| <"//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
-| <"/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/">
+
+TOKEN: {
+    <ESCAPE: "\\" ~[]>
 }
 
-TOKEN : /* LITERALS */
-{
-  < INTEGER_LITERAL:
-        <DECIMAL_LITERAL> (["l","L"])?
-      | <HEX_LITERAL> (["l","L"])?
-      | <OCTAL_LITERAL> (["l","L"])?
-  >
-|
-  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
-|
-  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
-|
-  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+<DEFAULT, IN_EXPRESSION> TOKEN: {
+    <EXPR_START: "${"> : IN_EXPRESSION
 }
 
-TOKEN : /* IDENTIFIERS */
-{
-  < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
-|
-  < #LETTER: ["_","a"-"z","A"-"Z"] >
-|
-  < #DIGIT: ["0"-"9"] >
+<IN_EXPRESSION> SKIP : {
+    "\n" | "\r" | "\t" | " "
 }
 
-/** Main production. */
-ASTStart Start() : {}
-{
-  Expression() ";"
-  { return jjtThis; }
+<IN_EXPRESSION> TOKEN : {
+    <IDENTIFIER: (["a"-"z", "A"-"Z", "0"-"9", "_", "-"])+>
 }
 
-/** An Expression. */
-void Expression() #void : {}
-{
-  AdditiveExpression()
+<IN_EXPRESSION> TOKEN : {
+    <LPAR: "(">
+|   <RPAR: ")">
+|   <COMMA: ",">
 }
 
-/** An Additive Expression. */
-void AdditiveExpression() #void : {}
-{
-  (
-    MultiplicativeExpression() ( ( "+" | "-" ) MultiplicativeExpression() )*
-  ) #Add(>1)
+
+<IN_EXPRESSION> TOKEN : {
+    <EXPR_END: "}"> : DEFAULT
 }
 
-/** A Multiplicative Expression. */
-void MultiplicativeExpression() #void : {}
-{
-  (
-    UnaryExpression() ( ( "*" | "/" | "%" ) UnaryExpression() )*
-  ) #Mult(>1)
+TOKEN: {
+    <TEXT: ~[]>
 }
 
-/** A Unary Expression. */
-void UnaryExpression() #void : {}
+HttpmlTemplate parseTemplate() :
 {
-  "(" Expression() ")" | MyID() | Integer()
+    Token t;
+    StringBuilder builder = new StringBuilder();
+    final Map<Character, Character> escapeMap = Map.of(
+        'b', '\b',
+        't', '\t',
+        '0', '\0',
+        'n', '\n',
+        'r', '\r'
+    );
+}
+{
+    (
+        t = <TEXT> | <ESCAPE> { builder.append(t.image); }
+    )* <EOF>
+    { return new HttpmlTemplate(List.of()); }
 }
 
-/** An Identifier. */
-void MyID() :
+HttpmlExpression parseExpression() :
 {
-  Token t;
+    Token t;
+    StringBuilder builder = new StringBuilder();
+    final Map<Character, Character> escapeMap = Map.of(
+        'b', '\b',
+        't', '\t',
+        '0', '\0',
+        'n', '\n',
+        'r', '\r'
+    );
 }
 {
-  t=<IDENTIFIER>
-  {
-    jjtThis.jjtSetValue(t.image);
-  }
-}
-
-/** An Integer. */
-void Integer() : {}
-{
-  <INTEGER_LITERAL>
+    (
+        t = <TEXT> | <ESCAPE> { builder.append(t.image); }
+    )* <EOF>
+    { return new HttpmlTemplate(List.of()); }
 }

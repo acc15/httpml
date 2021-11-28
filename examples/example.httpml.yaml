@@ -10,7 +10,7 @@ variables:
 
 request:
     headers:
-        Authorization: Basic ${base64($user:$password, encoding=utf-8)}
+        Authorization: Basic ${base64(${user}:${password}, encoding=utf-8)}
         Content-Type: application/json
         # Reading from file
         # Authorization: Basic ${base64(file(credentials.txt, encoding = utf-8))}

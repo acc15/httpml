@@ -5,13 +5,19 @@ import java.io.StringReader
 
 class HttpmlExpressionParserTest: StringSpec({
 
-    fun p(str: String) = HttpmlExpressionParser(StringReader(str))
+    fun p(str: String): HttpmlExpressionParser {
+        println("Input: $str")
+        return HttpmlExpressionParser(StringReader(str))
+    }
 
-    "must parse identifier" {
+    "must parse plain text" {
+        val t = p("Some text").start()
+        println("Plain: $t")
+    }
 
-        val node = p("(a+b)*(c+4);").Start()
-        node.dump("")
-
+    "must parse escaped text" {
+        val t = p("Some \\n\\r \\\${\\} text").start()
+        println("Escaped: $t")
     }
 
 })

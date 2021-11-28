@@ -10,12 +10,10 @@ javacc {
         register("template") {
             inputFile = file("src/main/javacc/HttpmlExpressionParser.jjt")
             packageName = "httpml.expression.parser"
-            lookahead = 1
-            staticParam = "false"
-            jjtree {
-                isConfigured = true
-                multi = "true"
-            }
+//            jjtree {
+//                isConfigured = true
+//            }
         }
     }
+    javaCCVersion = "7.0.10"
 }
