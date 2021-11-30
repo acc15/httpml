@@ -6,12 +6,12 @@
 
 ## Function call
 
-    Test template ${fun(
+    Test template ${fun | 
         parameter1,
         parameter2  ,
         named_parameter1 = text_value1,
         named_parameter2 = text_value2
-    )}
+    }
 
 ## What is value?
 
@@ -50,7 +50,7 @@ For example imagine there is two functions: `plus` and `minus` and variable name
 
 We may use this variable to resolve function name:
 
-    ${${op_name}(1, 2)}
+    ${${op_name} | 1, 2}
 
 When `op_name = plus` we get `3`, and when `op_name = minus` we get `-2`
 
@@ -74,28 +74,27 @@ In any part of value you can use java escapes. Escaped characters won't be trimm
 Variable names, function names, parameter names and parameter values may be specified in quotes:
 
     ${'var_name'}
-    ${fun(' parameter in quotes. All spaces are preserved as is', 'named_parameter1' = 'some text value')}
+    ${fun | ' parameter in quotes. All spaces are preserved as is', 'named_parameter1' = 'some text value'}
 
 In quoted values you can use espaced characters:
 
-    ${fun(named_parameter = 'some\n\r\t\a strange \u0031 parameter value')}
+    ${fun | named_parameter = 'some\n\r\t\a strange \u0031 parameter value'}
 
 Nested expressions also supported:
 
-    ${fun(named_parameter = 'You name is ${name}')}
+    ${fun | named_parameter = 'You name is ${name}'}
 
 And even quoted value within nested expression within quoted value:
 
-    ${fun(p = 'You name is ${some_func('nested quoted value which may also contain ${nested_expression}')}')}
+    ${fun | p = 'You name is ${some_func | 'nested quoted value which may also contain ${nested_expression}'}'}
 
-## Unquoted values (variables, function names, parameter names and parameter values)
+## Unquoted values
 
 You CAN'T use following characters directly without quotes:
 
-* `=`
-* `->`
-* `)`
-* `,`
+* `=` (allowed in variable names and function names)
+* `|` (allowed only in parameter names and parameter values)
+* `,` (allowed in variable names and function names)
 * `\n`, `\r` are completely ignored
 * spaces (` `) and tabs (`\t`) are trimmed
 
@@ -116,3 +115,6 @@ But better and simpler to use quoted values in such cases.
 
     Authorization: Basic ${base64 | ${user}:${password}, encoding = utf-8}
 
+## Switch
+
+    url: ${switch | ${env}, http://default-server, test = http://test-server, uat = http://uat-server}
