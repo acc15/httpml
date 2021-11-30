@@ -8,80 +8,149 @@ PARSER_BEGIN(HttpmlExpressionParser)
 
 package httpml.expression.parser;
 
-import httpml.expression.ast.HttpmlTemplate;
+import httpml.expression.ast.*;
+import java.util.Stack;
 import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
 
 public class HttpmlExpressionParser {
+
+    public void resetTextChunk(StringBuilder b, List<HttpmlChunk> chunks) {
+        if (b.length() == 0) {
+            return;
+        }
+        chunks.add(new HttpmlText(b.toString()));
+        b.setLength(0);
+    }
+
 }
 
 PARSER_END(HttpmlExpressionParser)
 
-TOKEN: {
-    <ESCAPE: "\\" ~[]>
+TOKEN_MGR_DECLS :
+{
+    final Stack<Integer> lexicalStateStack = new Stack<>();
+
+    public void pushState(int newState) {
+        lexicalStateStack.push(curLexState);
+        SwitchTo(newState);
+    }
+
+    public void popState() {
+        SwitchTo(lexicalStateStack.pop());
+    }
+
 }
 
-<DEFAULT, IN_EXPRESSION> TOKEN: {
-    <EXPR_START: "${"> : IN_EXPRESSION
+<IN_QUOTE, IN_EXPRESSION> TOKEN: {
+    <ESCAPE_B: "\\b">
+|   <ESCAPE_HT: "\\t">
+|   <ESCAPE_LF: "\\n">
+|   <ESCAPE_FF: "\\f">
+|   <ESCAPE_CR: "\\r">
+|   <ESCAPE_0: "\\0">
+|   <ESCAPE_UNICODE: "\\u" (["0"-"9", "a"-"f", "A"-"F"]){4}>
+|   <ESCAPE_OCTAL: "\\" (["0"-"7"]){3}>
+|   <ESCAPE_CHAR: "\\" ~[]>
+}
+
+<DEFAULT, IN_EXPRESSION, IN_QUOTE> TOKEN: {
+    <EXPR_START: "${"> { pushState(IN_EXPRESSION); }
 }
 
 <IN_EXPRESSION> SKIP : {
-    "\n" | "\r" | "\t" | " "
+    "\n" | "\r"
 }
 
 <IN_EXPRESSION> TOKEN : {
-    <IDENTIFIER: (["a"-"z", "A"-"Z", "0"-"9", "_", "-"])+>
+    <QUOTE_START: "'"> { pushState(IN_QUOTE); }
+}
+
+<IN_QUOTE> TOKEN : {
+    <QUOTE_END: "'"> { popState(); }
 }
 
 <IN_EXPRESSION> TOKEN : {
-    <LPAR: "(">
-|   <RPAR: ")">
-|   <COMMA: ",">
+    <EXPR_END: "}"> { popState(); }
 }
-
 
 <IN_EXPRESSION> TOKEN : {
-    <EXPR_END: "}"> : DEFAULT
+    <EXPR_COMMA: ",">
+|   <EXPR_CALL: "|">
+|   <EXPR_WS: ([" ", "\t"])+>
 }
 
-TOKEN: {
+<DEFAULT, IN_EXPRESSION, IN_QUOTE> TOKEN: {
     <TEXT: ~[]>
 }
 
-HttpmlTemplate parseTemplate() :
-{
-    Token t;
-    StringBuilder builder = new StringBuilder();
-    final Map<Character, Character> escapeMap = Map.of(
-        'b', '\b',
-        't', '\t',
-        '0', '\0',
-        'n', '\n',
-        'r', '\r'
-    );
+HttpmlChunk expression(): {
+    HttpmlValue key;
 }
 {
-    (
-        t = <TEXT> | <ESCAPE> { builder.append(t.image); }
-    )* <EOF>
-    { return new HttpmlTemplate(List.of()); }
+    <EXPR_START> key = value() <EXPR_END>
+    { return key; }
 }
 
-HttpmlExpression parseExpression() :
-{
+HttpmlValue value(): {
+    final List<HttpmlChunk> chunks = new ArrayList<>();
+    StringBuilder b = new StringBuilder();
     Token t;
-    StringBuilder builder = new StringBuilder();
-    final Map<Character, Character> escapeMap = Map.of(
-        'b', '\b',
-        't', '\t',
-        '0', '\0',
-        'n', '\n',
-        'r', '\r'
-    );
+    char ch;
+}
+{
+
+    [ <EXPR_WS> ]
+
+    innerValue(b, chunks)
+
+    (
+
+        LOOKAHEAD(2)
+        t = <EXPR_WS> { b.append(t.image); }
+
+        innerValue(b, chunks)
+
+    )*
+
+    [ <EXPR_WS> ]
+
+    {
+        resetTextChunk(b, chunks);
+        return new HttpmlValue(chunks);
+    }
+}
+
+void innerValue(StringBuilder b, List<HttpmlChunk> chunks) : {
+    HttpmlChunk chunk;
+    char ch;
 }
 {
     (
-        t = <TEXT> | <ESCAPE> { builder.append(t.image); }
-    )* <EOF>
-    { return new HttpmlTemplate(List.of()); }
+        chunk = expression() { resetTextChunk(b, chunks); chunks.add(chunk); }
+    |
+        <QUOTE_START>
+        (
+            chunk = expression() { resetTextChunk(b, chunks); chunks.add(chunk); }
+        |   ch = singleChar() { b.append(ch); }
+        )*
+        <QUOTE_END>
+    |
+        ch = singleChar() { b.append(ch); }
+    )+
 }
+
+char singleChar() : { Token t; }
+{
+    <ESCAPE_B> { return '\b'; }
+|   <ESCAPE_HT> { return '\t'; }
+|   <ESCAPE_LF> { return '\n'; }
+|   <ESCAPE_FF> { return '\f'; }
+|   <ESCAPE_CR> { return '\r'; }
+|   <ESCAPE_0> { return '\0'; }
+|   t = <ESCAPE_UNICODE> { return (char) Integer.parseInt(t.image.substring(2), 16); }
+|   t = <ESCAPE_OCTAL> { return (char) Integer.parseInt(t.image.substring(1), 8); }
+|   t = <ESCAPE_CHAR> { return t.image.charAt(1); }
+|   t = <TEXT> { return t.image.charAt(0); }
+}
+
