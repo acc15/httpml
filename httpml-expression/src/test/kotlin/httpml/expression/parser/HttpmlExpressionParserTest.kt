@@ -5,7 +5,10 @@ import httpml.expression.ast.HttpmlValue
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.data.blocking.forAll
 import io.kotest.data.row
+import io.kotest.matchers.collections.beEmpty
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.property.forAll
 import java.io.StringReader
@@ -58,6 +61,11 @@ class HttpmlExpressionParserTest: StringSpec({
             val chunks = inExpression(input).value().chunks
             chunks shouldContainExactly listOf(HttpmlText(expected))
         }
+    }
+
+    "must parse empty quoted text" {
+        val v = inExpression("  '' \t ").value()
+        v.chunks.shouldBeEmpty()
     }
 
     "must parse nested expression" {
